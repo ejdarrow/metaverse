@@ -12,6 +12,13 @@ $(function() {
 	var $usernameInput = $('.usernameInput');
 	var $messages = $('.messages');
 	var $inputMessage = $('.inputMessage');
+	
+	//Location
+	var xLoc = 0.0; //floats
+	var yLoc = 0.0; 
+	var zLoc = 0.0; //Fixed for now 
+	var directionXY = 0.0; //Expressed in degrees.
+	var directionI = 0.0; // Looking up/down
 
 	var $loginPage = $('.login.page');
 	var $chatPage = $('.chat.page');
@@ -19,6 +26,7 @@ $(function() {
 	//Prompt for setting username
 	var username;
 	var connected = false;
+	var dialogState = false;
 	var typing = false;
 	var lastTypingTime;
 	var $currentInput = $usernameInput.focus();
@@ -170,17 +178,123 @@ $(function() {
 	}
 
 
+	//Movement
+
+	var TURN_ANGLE = 5.0;
+	var MOVE_INCREMENT = 5; //Add acceleration / Running
+	
+	const advance = () => {
+		var directionXYrad = directionXY * Math.PI / 180.0;
+		xLoc += MOVE_INCREMENT * Math.cos(directionXYrad);
+		yLoc += MOVE_INCREMENT * Math.sin(directionXYrad);
+	}
+	
+	const turnLeft = () => {
+		directionXY -= TURN_ANGLE;
+		directionXY = clipDirection(directionXY);
+	}
+
+	const turnRight = () => {
+		directionXY += TURN_ANGLE;
+		directionXY = clipDirection(directionXY);
+	}
+
+	const retreat = () => {
+		var directionXYrad = directionXY * Math.PI / 180.0;
+		xLoc -= MOVE_INCREMENT * Math.cos(directionXYrad);
+		yLoc -= MOVE_INCREMENT * Math.sin(directionXYrad);
+	}
+
+
+	const clipDirection = (direction) => {
+		if(direction >= 360.0){
+                        return direction - 360.0;
+                } else if(direction < 0){
+                        return 360.0 + direction;
+                } else {
+			return direction;
+		}
+	}
+
+	const logLocation = () => {
+		log(username + ": x=" + xLoc + ", y=" + yLoc + ", theta=" + directionXY);
+	}
+
+	//Draw logic
+	
+        //Assets is an array of objects with x y theta coords plus color. Will be expanded.
+        const drawFrame = (assets) => {
+		var space = document.getElementById("space");
+                var drawContext = space.getContext("2d");
+		//Debug mode:
+		assets = [ { x: xLoc + 50.0, y: yLoc + 50.0, theta: directionXY, color: "#e21400"}];
+                //Clear
+                drawContext.clearRect(0, 0, space.width, space.height);
+
+                assets.forEach(asset => {
+                        var midpoint = getTipPoint(asset);
+                        var endpoint = getTipPoint(midpoint);
+	                 //Draw a pointer
+                        drawContext.beginPath();
+                        drawContext.lineWidth = "3";
+                        drawContext.strokeStyle = asset.color;
+                        drawContext.moveTo(asset.x, asset.y);
+                        drawContext.lineTo(midpoint.x, midpoint.y);
+                        drawContext.stroke();
+
+                        drawContext.beginPath();
+                        drawContext.lineWidth = "1";
+                        drawContext.strokeStyle = asset.color;
+                        drawContext.moveTo(midpoint.x, midpoint.y);
+                        drawContext.lineTo(endpoint.x, endpoint.y);
+                        drawContext.stroke();
+                });
+        }
+
+        var TIP_LENGTH = 10.0;
+
+        const getTipPoint = (ray) => {
+                thetaRad = ray.theta * Math.PI / 180.0;
+                tip = {
+                        x : ray.x + Math.cos(thetaRad) * TIP_LENGTH,
+                        y : ray.y + Math.sin(thetaRad) * TIP_LENGTH,
+                        theta : ray.theta
+                };
+                return tip;
+        }
+
+
 	//Keyboard events
 
 	$window.keydown(event => {
-		if(!(event.ctrlKey || event.metaKey || event.altKey)){
-			$currentInput.focus();
+		if(!dialogState && username) { //We are logged in and not dialog
+			$currentInput.blur();
+			if(event.which === 87 || event.which === 38 ) { // w || up
+				advance();
+				drawFrame();
+			} else if(event.which === 65 || event.which === 37) { // a || left
+				turnLeft();
+				drawFrame();
+			} else if(event.which === 83 || event.which === 40) { // s || down
+				retreat();
+				drawFrame();
+			} else if(event.which === 68 || event.which === 39) { // d || right
+				turnRight();
+				drawFrame();
+			}
 		}
-		if(event.which === 13) {
+		if(event.which === 13) { //Pressing enter
 			if (username) {
-				sendMessage();
-				socket.emit('stop typing');
-				typing = false;
+				if(dialogState){
+					sendMessage();
+					socket.emit('stop typing');
+					typing = false;
+					$currentInput.blur();
+					dialogState = false;
+				} else {
+					$currentInput.focus()
+					dialogState = true;
+				}
 			} else {
 				setUsername();
 			}
@@ -200,6 +314,7 @@ $(function() {
 
 	$inputMessage.click(() => {
 		$inputMessage.focus();
+		dialogState = true;
 	});
 
 
@@ -213,7 +328,7 @@ $(function() {
 			prepend: true
 		});
 		addParticipantsMessage(data);
-	
+		$inputMessage.blur();	
 	});
 
 	socket.on('new message', (data) => {

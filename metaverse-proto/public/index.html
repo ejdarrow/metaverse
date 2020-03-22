@@ -6,11 +6,14 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <ul id="pages">
+    <ul class="pages">
       <li class="chat page">
         <div class="chatArea">
           <ul class="messages"></ul>
         </div>
+	<div class="drawArea">
+	  <canvas id="space" height="400px" width="400px"/>
+	</div>
         <input class="inputMessage" placeholder="Type here..."/>
       </li>
       <li class="login page">
