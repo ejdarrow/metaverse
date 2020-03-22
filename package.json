@@ -1,0 +1,17 @@
+{
+	"name": "metaverse",
+	"version": "0.0.1",
+	"description": "A prototype of the metaverse project",
+	"main": "metaverse-proto/index.js",
+	"author":"Emily Darrow",
+	"license":"BSD",
+	"private":true,
+	"dependencies": {
+		"express": "^4.17.1",
+		"socket.io": "^2.3.0"
+	},
+	"scripts": {
+		"start": "node metaverse-proto/index.js"
+	}
+	
+}
