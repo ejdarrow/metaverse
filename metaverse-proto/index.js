@@ -21,10 +21,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 //TODO: Implement max room size
 
 var numUsers = 0;
+var locations = {};
 
 io.on('connection', function(socket){
 	var addedUser = false;
+	
+	socket.on('move', (data) => {
+		data["username"] = socket.username;
+		locations[socket.username] = data;
+		
+		io.emit('redraw', Object.values(locations));
+	});
 
+	
 	socket.on('add user', (username) => {
 		socket.username = username;
 		++numUsers;		

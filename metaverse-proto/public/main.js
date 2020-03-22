@@ -14,8 +14,8 @@ $(function() {
 	var $inputMessage = $('.inputMessage');
 	
 	//Location
-	var xLoc = 0.0; //floats
-	var yLoc = 0.0; 
+	var xLoc = 50.0; //floats
+	var yLoc = 50.0; 
 	var zLoc = 0.0; //Fixed for now 
 	var directionXY = 0.0; //Expressed in degrees.
 	var directionI = 0.0; // Looking up/down
@@ -53,6 +53,7 @@ $(function() {
 			$currentInput = $inputMessage.focus();
 
 			socket.emit('add user', username);
+			sendMove();
 		}
 	}
 	
@@ -227,11 +228,13 @@ $(function() {
 		var space = document.getElementById("space");
                 var drawContext = space.getContext("2d");
 		//Debug mode:
-		assets = [ { x: xLoc + 50.0, y: yLoc + 50.0, theta: directionXY, color: "#e21400"}];
+		// assets = [ { x: xLoc + 50.0, y: yLoc + 50.0, theta: directionXY, color: "#e21400"}];
                 //Clear
                 drawContext.clearRect(0, 0, space.width, space.height);
 
                 assets.forEach(asset => {
+
+
                         var midpoint = getTipPoint(asset);
                         var endpoint = getTipPoint(midpoint);
 	                 //Draw a pointer
@@ -251,7 +254,7 @@ $(function() {
                 });
         }
 
-        var TIP_LENGTH = 10.0;
+        var TIP_LENGTH = 5.0;
 
         const getTipPoint = (ray) => {
                 thetaRad = ray.theta * Math.PI / 180.0;
@@ -263,6 +266,17 @@ $(function() {
                 return tip;
         }
 
+	const sendMove = () => {
+		locationData = {
+			x: xLoc,
+			y: yLoc,
+			z: zLoc,
+			theta: directionXY,
+			phi: directionI,
+			color: getUsernameColor(username)
+		};
+		socket.emit("move", locationData);
+	}
 
 	//Keyboard events
 
@@ -271,16 +285,16 @@ $(function() {
 			$currentInput.blur();
 			if(event.which === 87 || event.which === 38 ) { // w || up
 				advance();
-				drawFrame();
+				sendMove();
 			} else if(event.which === 65 || event.which === 37) { // a || left
 				turnLeft();
-				drawFrame();
+				sendMove();
 			} else if(event.which === 83 || event.which === 40) { // s || down
 				retreat();
-				drawFrame();
+				sendMove();
 			} else if(event.which === 68 || event.which === 39) { // d || right
 				turnRight();
-				drawFrame();
+				sendMove();
 			}
 		}
 		if(event.which === 13) { //Pressing enter
@@ -319,7 +333,9 @@ $(function() {
 
 
 	// Socket events
-
+	socket.on('redraw', (assets) => {
+		drawFrame(assets);
+	});
 	socket.on('login', (data) => {
 		connected = true;
 		
