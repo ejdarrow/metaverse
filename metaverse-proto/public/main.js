@@ -224,7 +224,8 @@ $(function() {
 	//Draw logic
 	
         //Assets is an array of objects with x y theta coords plus color. Will be expanded.
-        const drawFrame = (assets) => {
+       /*
+	 const drawFrame = (assets) => {
 		var space = document.getElementById("space");
                 var drawContext = space.getContext("2d");
 		//Debug mode:
@@ -253,7 +254,9 @@ $(function() {
                         drawContext.stroke();
                 });
         }
+*/
 
+	
         var TIP_LENGTH = 5.0;
 
         const getTipPoint = (ray) => {

@@ -1,0 +1,17 @@
+.voxel {
+	-webkit-transition: -webkit-transform 2s linear;
+	-webkit-transform-style: preserve-3d;
+	-moz-transition: -moz-transform 2s linear;
+	-moz-transform-style: preserve-3d;
+	transition: transform 2s linear;
+	transform-style: preserve-3d;
+}
+
+/*
+Controls the styling of each side of each voxel.
+*/
+.voxelFace {
+	position:absolute;
+	background-color:rgba(50, 50, 50, 0);
+	outline: 2px solid rgba(255, 0, 255, 0.8);;
+}

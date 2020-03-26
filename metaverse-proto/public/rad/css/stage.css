@@ -1,0 +1,47 @@
+/*
+Controls the translucency of the reference images.
+*/
+img{
+	opacity:0.5;
+}
+
+.view{
+	width:500px;
+	height:500px;
+}
+
+#stage {
+	-webkit-perspective:800px;
+	-webkit-perspective-origin:50% 200px;
+	-moz-perspective:800px;
+	-moz-perspective-origin:50% 200px;
+	perspective:800px;
+	perspective-origin:50% 200px;
+}
+
+#cube {
+	margin:100px auto;
+	-webkit-transition:-webkit-transform 2s linear;
+	-webkit-transform-style:preserve-3d;
+	-moz-transition:-moz-transform 2s linear;
+	-moz-transform-style:preserve-3d;
+	transition:transform 2s linear;
+	transform-style:preserve-3d;
+
+	/*Disables the user from inadvertently selecting the div's text*/
+	-webkit-user-select:none;  
+	-moz-user-select:none;    
+	-ms-user-select:none;      
+	user-select:none;
+	cursor:pointer;
+}
+
+/*
+Controls the styling of each side of the stage.
+*/
+.face {
+	position:absolute;
+	background-color:rgba(50, 50, 50, 0);
+	color:black;
+	border:0px solid black;
+}

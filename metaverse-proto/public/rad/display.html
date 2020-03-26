@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Render by Accretion Display</title>
+		<script type="module" src="js/gridInstance.js"></script>
+		<script type="module" src="js/voxel.js"></script>
+		<script   src="https://code.jquery.com/jquery-3.4.1.min.js"   integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="   crossorigin="anonymous"></script>
+		<link rel="stylesheet" type="text/css" href="css/layout.css">
+		<link rel="stylesheet" type="text/css" href="css/control.css">
+		<link rel="stylesheet" type="text/css" href="css/stage.css">
+		<link rel="stylesheet" type="text/css" href="css/voxel.css">
+		<link rel="stylesheet" type="text/css" href="css/the_grid.css">
+	</head>
+	<body onkeydown='/*rotateByArrowKeys(event);*/keyEvent(event);' style="background:black; 
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;">
+		<div>
+			<table style="width:100%;">
+				<tr>
+					<td>
+						<!--Stage object, a cube consisting of six face elements.-->
+						<div id="stage">
+							<div id="cube" >
+								<!--top-->
+								<div id="face1" class="face"></div>
+
+								<!--front-->
+								<div id="face2" class="face two"></div>
+
+								<!--right-->
+								<div id="face3" class="face three"></div>
+
+								<!--back-->
+								<div id="face4" class="face four"></div>
+
+								<!--left-->
+								<div id="face5" class="face five"></div>
+
+								<!--bottom-->
+								<div id="face6" class="face six">
+									<div class="grid">
+									</div>
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</body>
+	<script type="module" src="js/stage.js"></script>
+	<script type="module" >
+	import { drawBox } from './js/voxel.js';
+	import {moveByMouse, gridInstance} from './js/stage.js';
+	window.onload = function(){
+		
+		drawBox(gridInstance);
+	}
+	$("#cube").click(moveByMouse);
+	</script>
+</html>

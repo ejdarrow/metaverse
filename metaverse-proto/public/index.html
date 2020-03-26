@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>Metaverse (chat)</title>
     <link rel="stylesheet" href="style.css">
+	<!-- Rad -->
+	<script type="module" src="rad/js/gridInstance.js"></script>
+        <script type="module" src="rad/js/voxel.js"></script>
+        <link rel="stylesheet" type="text/css" href="rad/css/layout.css">
+        <link rel="stylesheet" type="text/css" href="rad/css/control.css">
+        <link rel="stylesheet" type="text/css" href="rad/css/stage.css">
+        <link rel="stylesheet" type="text/css" href="rad/css/voxel.css">
+        <link rel="stylesheet" type="text/css" href="rad/css/the_grid.css">        
   </head>
   <body>
     <ul class="pages">
@@ -11,8 +19,24 @@
         <div class="chatArea">
           <ul class="messages"></ul>
         </div>
-	<div class="drawArea">
-	  <canvas id="space" height="400px" width="400px"/>
+	<div class="drawArea" style="background:black;">
+		<div id="stage">
+		<div id="cube">
+			<div id="face1" class="face">
+			</div>
+			<div id="face2" class="face two">
+                        </div>
+			<div id="face3" class="face three">
+                        </div>
+			<div id="face4" class="face four">
+                        </div>
+			<div id="face5" class="face five">
+                        </div>
+			<div id="face6" class="face six">
+                        </div>
+				
+		</div>
+		</div>
 	</div>
         <input class="inputMessage" placeholder="Type here..."/>
       </li>
@@ -25,6 +49,17 @@
     </ul>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-  <script src="/main.js"></script>
-  </body>
+  <script src="/main.js"></script
+	<script type="module" src="rad/js/stage.js"></script>
+        <script type="module" >
+        import { drawBox } from './rad/js/voxel.js';
+        import {moveByMouse, gridInstance} from './rad/js/stage.js';
+        window.onload = function(){
+
+                drawBox(gridInstance);
+        }
+        $("#cube").click(moveByMouse);
+        </script>  
+
+</body>
 </html>
