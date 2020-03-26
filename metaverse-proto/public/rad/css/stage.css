@@ -17,6 +17,7 @@ img{
 	-moz-perspective-origin:50% 200px;
 	perspective:800px;
 	perspective-origin:50% 200px;
+	overflow:hidden;
 }
 
 #cube {

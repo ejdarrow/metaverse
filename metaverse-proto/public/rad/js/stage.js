@@ -96,7 +96,7 @@ function normalize(coordinate, x, y){
 }
 
 export function updateCamera() {
-	document.getElementById('cube').style[prop] = "translateZ(" + gridInstance.cameraZ + "px) translateY(" + gridInstance.cameraY + "px) translateX(" + gridInstance.cameraX + "px) rotateZ(" + gridInstance.cameraTheta + "deg)";
+	document.getElementById('cube').style[prop] = "translateZ(-" + gridInstance.cameraZ + "px) translateY(-" + gridInstance.cameraY + "px) translateX(-" + gridInstance.cameraX + "px) rotateY(" + gridInstance.cameraTheta + "deg)";
 }
 
 

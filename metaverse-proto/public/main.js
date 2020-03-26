@@ -1,5 +1,7 @@
-import {drawBox} from '/rad/js/voxel.js';
+import {drawAsset} from '/rad/js/voxel.js';
 import {gridInstance, updateCamera} from '/rad/js/stage.js';
+import {staticAssets} from '/staticAssets/street.js'
+
 
 $(function() {
 	var FADE_TIME = 150; //ms
@@ -248,13 +250,14 @@ $(function() {
 				a: 0.25
 			},
 			theta: 0,
-			phi : 0
+			phi : 0,
+			type: "cube"
 		}];
 
 		assets.forEach( asset => {
 			if(asset.id != username + "_avatar") { // not me
 				$("#" + asset.id ).remove();
-				drawBox(gridInstance, asset);
+				drawAsset(gridInstance, asset);
 			} else { // me
 				gridInstance.cameraX = asset.center.x;
 				gridInstance.cameraY = asset.center.y;
@@ -263,41 +266,14 @@ $(function() {
 				updateCamera();
 			}
 		});
+		staticAssets.forEach(staticAsset => {
+			$("#" + staticAsset.id ).remove();
+			drawAsset(gridInstance, staticAsset);	
+		});
 	
 	}
 
 
-       /*
-	 const drawFrame = (assets) => {
-		var space = document.getElementById("space");
-                var drawContext = space.getContext("2d");
-		//Debug mode:
-		// assets = [ { x: xLoc + 50.0, y: yLoc + 50.0, theta: directionXY, color: "#e21400"}];
-                //Clear
-                drawContext.clearRect(0, 0, space.width, space.height);
-
-                assets.forEach(asset => {
-
-
-                        var midpoint = getTipPoint(asset);
-                        var endpoint = getTipPoint(midpoint);
-	                 //Draw a pointer
-                        drawContext.beginPath();
-                        drawContext.lineWidth = "3";
-                        drawContext.strokeStyle = asset.color;
-                        drawContext.moveTo(asset.x, asset.y);
-                        drawContext.lineTo(midpoint.x, midpoint.y);
-                        drawContext.stroke();
-
-                        drawContext.beginPath();
-                        drawContext.lineWidth = "1";
-                        drawContext.strokeStyle = asset.color;
-                        drawContext.moveTo(midpoint.x, midpoint.y);
-                        drawContext.lineTo(endpoint.x, endpoint.y);
-                        drawContext.stroke();
-                });
-        }
-*/
 
 	
         var TIP_LENGTH = 5.0;
@@ -332,18 +308,9 @@ $(function() {
 				a: 0.25
 			},
 			theta: directionXY,
-			phi: directionI
-		};
-		/*
-		var locationData = {
-			x: xLoc,
-			y: yLoc,
-			z: zLoc,
-			theta: directionXY,
 			phi: directionI,
-			color: getUsernameColor(username)
+			type:"diamond"
 		};
-		*/
 		socket.emit("move", locationData);
 	}
 
