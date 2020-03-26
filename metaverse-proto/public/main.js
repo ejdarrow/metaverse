@@ -1,3 +1,6 @@
+import {drawBox} from '/rad/js/voxel.js';
+import {gridInstance, updateCamera} from '/rad/js/stage.js';
+
 $(function() {
 	var FADE_TIME = 150; //ms
 	var TYPING_TIMER_LENGTH = 400; //ms
@@ -170,7 +173,7 @@ $(function() {
 	}
 
 	const getUsernameColor = (username) => {
-		hash = 7;
+		var hash = 7;
 		for (var i = 0; i < username.length; i++) {
 			hash = username.charCodeAt(i) + (hash << 5) - hash;
 		}
@@ -224,6 +227,46 @@ $(function() {
 	//Draw logic
 	
         //Assets is an array of objects with x y theta coords plus color. Will be expanded.
+
+	const drawFrame = (assets) => {
+		var demoAssets = [{
+			id: "demoAvatar",
+			center: {
+				x: 100,
+				y: 100,
+				z: 0
+			},
+			dimensions: {
+				x: 100,
+				y: 100,
+				z: 100
+			},
+			color: {
+				r: 0,
+				g: 0,
+				b: 255,
+				a: 0.25
+			},
+			theta: 0,
+			phi : 0
+		}];
+
+		assets.forEach( asset => {
+			if(asset.id != username + "_avatar") { // not me
+				$("#" + asset.id ).remove();
+				drawBox(gridInstance, asset);
+			} else { // me
+				gridInstance.cameraX = asset.center.x;
+				gridInstance.cameraY = asset.center.y;
+				gridInstance.cameraZ = asset.center.z;
+				gridInstance.cameraTheta = asset.theta;	
+				updateCamera();
+			}
+		});
+	
+	}
+
+
        /*
 	 const drawFrame = (assets) => {
 		var space = document.getElementById("space");
@@ -270,7 +313,29 @@ $(function() {
         }
 
 	const sendMove = () => {
-		locationData = {
+		var locationData = {
+			id: username + "_avatar",
+			center: {
+				x: xLoc,
+				y: yLoc,
+				z: zLoc
+			},
+			dimensions: {
+				x: 100,
+				y: 100,
+				z: 100
+			},
+			color: {
+				r: 0,
+				g: 0,
+				b: 255,
+				a: 0.25
+			},
+			theta: directionXY,
+			phi: directionI
+		};
+		/*
+		var locationData = {
 			x: xLoc,
 			y: yLoc,
 			z: zLoc,
@@ -278,6 +343,7 @@ $(function() {
 			phi: directionI,
 			color: getUsernameColor(username)
 		};
+		*/
 		socket.emit("move", locationData);
 	}
 
@@ -339,6 +405,21 @@ $(function() {
 	socket.on('redraw', (assets) => {
 		drawFrame(assets);
 	});
+	socket.on('kick', (reason) => {
+		log("You have been kicked because:");
+		switch (reason.reason) {
+			case "exists": 
+				log("Your username already exists");
+				break;
+			case "max":
+				log("Max users connected");
+				break;
+			default:
+				log("We felt like it");
+				break;
+		}
+		
+	});
 	socket.on('login', (data) => {
 		connected = true;
 		
@@ -363,6 +444,7 @@ $(function() {
 		log(data.username + ' left');
 		addParticipantsMessage(data);
 		removeChatTyping(data);
+		$("#" + data.username + "_avatar").remove();
 	});
 
 	socket.on('typing', (data) => {

@@ -18,14 +18,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 // Sockets
-//TODO: Implement max room size
 
 var numUsers = 0;
+var maxUsers = 10;
 var locations = {};
 
 io.on('connection', function(socket){
 	var addedUser = false;
-	
 	socket.on('move', (data) => {
 		data["username"] = socket.username;
 		locations[socket.username] = data;
@@ -35,20 +34,28 @@ io.on('connection', function(socket){
 
 	
 	socket.on('add user', (username) => {
-		socket.username = username;
-		++numUsers;		
-		addedUser = true;
+		if(username in locations){
+			socket.emit('kick', { reason: "exists" });
+			socket.disconnect();
+		} else if (numUsers >= maxUsers) {
+			socket.emit('kick', { reason: "max" });
+			socket.disconnect();
+		} else {
+			socket.username = username;
+			++numUsers;		
+			addedUser = true;
 
-		//Here will go the max room size logic
+			//Here will go the max room size logic
 
-		socket.emit('login', {
-			numUsers: numUsers
-		});
+			socket.emit('login', {
+				numUsers: numUsers
+			});
 
-		socket.broadcast.emit('user joined', {
-			username: socket.username,
-			numUsers: numUsers
-		});
+			socket.broadcast.emit('user joined', {
+				username: socket.username,
+				numUsers: numUsers
+			});
+		}
 	});
 	
 	socket.on('typing', () => {
@@ -67,6 +74,7 @@ io.on('connection', function(socket){
 	socket.on('disconnect', () => {
 		if(addedUser){
 			--numUsers;
+			delete locations[socket.username];
 		}
 		
 		socket.broadcast.emit('user left', {

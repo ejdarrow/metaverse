@@ -13,15 +13,17 @@ function updateGridOnMouseUp(){
 }
 
 
-export function drawBox(gridInstance){
+export function drawBox(gridInstance, boxDetails){
 	/*
 		x -> 
 		
 		y /
 
 		z ^
-	*/	
+	*/
+	/*	
 	var boxDetails = {
+			id : "name",
 			center : {
 				x : 100,
 				y : 100,
@@ -41,10 +43,11 @@ export function drawBox(gridInstance){
 			theta : 0, //xy degree
 			phi :0    //xz degree
 		};
-	/**/
+	*/
 
 	var center = document.createElement('div');
 	center.className = "voxel";
+	center.id = boxDetails.id;
 	var topFace = document.createElement('div');
 	topFace.className = "voxelFace";
 	var cssText = "height:" + boxDetails.dimensions.x + "px;";
@@ -62,9 +65,9 @@ export function drawBox(gridInstance){
 	frontFace.className = "voxelFace";
 	cssText = "height:" + boxDetails.dimensions.z + "px;";
 	cssText += "width:" + boxDetails.dimensions.x + "px;";
-	cssText += "background-color:rgba(" + boxDetails.color.r + ", " +
+	cssText += "background-color:rgba(" + 255 + ", " +
                                                 boxDetails.color.g + ", " +
-                                                boxDetails.color.b + ", " +
+                                                0  + ", " +
                                                 boxDetails.color.a + ");";
 	cssText += "-webkit-transform: translateZ(" + boxDetails.dimensions.y/2 + "px);"
 	frontFace.setAttribute("style", cssText);
@@ -124,9 +127,9 @@ export function drawBox(gridInstance){
 	center.appendChild(backFace);
 	center.appendChild(bottomFace);
 
-	center.style.paddingLeft = boxDetails.center.x + "px";
-	center.style.paddingTop = boxDetails.center.z + "px";
-	center.style.transform = "translateZ(" + boxDetails.center.y + "px) rotateY(" + boxDetails.theta + "deg)  rotateX(" + boxDetails.phi + "deg) rotateZ("+boxDetails.phi + "deg)";
+	//center.style.paddingLeft = (boxDetails.dimensions.x / 2) + "px";
+	//center.style.paddingTop = (boxDetails.dimensions.z / 2) + "px";
+	center.style.transform = "rotateY(" + boxDetails.theta + "deg)  rotateX(" + boxDetails.phi + "deg) rotateZ("+boxDetails.phi + "deg) translateZ(" + boxDetails.center.y + "px) translateX(" + boxDetails.center.x + "px) translateY(" + boxDetails.center.y + "px)";
 	//Implement rotation by theta and phi	
 
 	document.getElementById("cube").appendChild(center);
