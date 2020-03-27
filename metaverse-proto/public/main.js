@@ -1,5 +1,5 @@
 import {drawAsset} from '/rad/js/voxel.js';
-import {gridInstance, updateCamera} from '/rad/js/stage.js';
+import {GridInstance} from '/rad/js/gridInstance.js';
 import {staticAssets} from '/staticAssets/street.js'
 
 
@@ -12,11 +12,20 @@ $(function() {
 		'#3b88eb', '#3824aa', '#a700ff', '#d300e7'
 	];
 	
+
 	//Initialize shit
 	var $window = $(window);
 	var $usernameInput = $('.usernameInput');
 	var $messages = $('.messages');
 	var $inputMessage = $('.inputMessage');
+
+	var gridInstance = new GridInstance();
+
+	var grid = document.getElementById("cube");
+
+	grid.style.height = gridInstance.cubeDimension + "px";
+
+	grid.style.width = gridInstance.cubeDimension + "px";
 	
 	//Location
 	var xLoc = 50.0; //floats
@@ -193,6 +202,7 @@ $(function() {
 		var directionXYrad = directionXY * Math.PI / 180.0;
 		xLoc += MOVE_INCREMENT * Math.cos(directionXYrad);
 		yLoc += MOVE_INCREMENT * Math.sin(directionXYrad);
+		logLocation();
 	}
 	
 	const turnLeft = () => {
@@ -229,8 +239,21 @@ $(function() {
 	//Draw logic
 	
         //Assets is an array of objects with x y theta coords plus color. Will be expanded.
+	
 
 	const drawFrame = (assets) => {
+		//I have to know where we are before we iterate, as the new draw engine is relative to the camera 'position'
+		assets.forEach( asset => {
+			if(asset.id == username + "_avatar") {
+				gridInstance.cameraX = asset.center.x;
+                                gridInstance.cameraY = asset.center.y;
+                                gridInstance.cameraZ = asset.center.z;
+                                gridInstance.cameraTheta = asset.theta;
+			}
+		});
+
+
+
 		var demoAssets = [{
 			id: "demoAvatar",
 			center: {
@@ -255,16 +278,10 @@ $(function() {
 		}];
 
 		assets.forEach( asset => {
-			if(asset.id != username + "_avatar") { // not me
+//			if(asset.id != username + "_avatar") { // not me
 				$("#" + asset.id ).remove();
 				drawAsset(gridInstance, asset);
-			} else { // me
-				gridInstance.cameraX = asset.center.x;
-				gridInstance.cameraY = asset.center.y;
-				gridInstance.cameraZ = asset.center.z;
-				gridInstance.cameraTheta = asset.theta;	
-				updateCamera();
-			}
+//			}
 		});
 		staticAssets.forEach(staticAsset => {
 			$("#" + staticAsset.id ).remove();

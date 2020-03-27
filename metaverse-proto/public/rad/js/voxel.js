@@ -1,30 +1,93 @@
 
-//Timer object used between voxel translation calls.
-var timer = null;
 
-//Calls the voxel translation function multiple times for the duration that the left mouse button is being held down.
-function updateGridOnMouseDown(direction){
-  timer = setInterval("updateGrid('" + direction + "');", cursorInterval);
-}
-
-//As soon as the user lifts up on the left mouse button, the translation timer needs to be reset.
-function updateGridOnMouseUp(){
-  window.clearInterval(timer);
-}
 export function drawAsset(gridInstance, assetDetails) {
-	switch(assetDetails.type) {
-		case "cube":
-			drawBox(gridInstance, assetDetails);
-			break;
-		case "diamond":
-			drawDiamond(gridInstance, assetDetails);
-			break;
-		case "plane":
-			drawPlane(gridInstance, assetDetails);
-			break;
-	}
+//	if(assetInView(gridInstance, assetDetails)){
+		switch(assetDetails.type) {
+			case "cube":
+				drawBox(gridInstance, assetDetails);
+				break;
+			case "diamond":
+				drawDiamond(gridInstance, assetDetails);
+				break;
+			case "plane":
+				drawPlane(gridInstance, assetDetails);
+				break;
+		}
+//	}
 
 }
+
+var VIEW_ANGLE = 0;
+
+//Whether we draw this or not.
+function assetInView(gridInstance, asset) {
+	var cameraVector = {
+		x: gridInstance.cameraX,
+		y: gridInstance.cameraY,
+		z: gridInstance.cameraZ,
+		perspective: gridInstance.cameraTheta
+	};
+	
+	var normalVectorOfCamera = normalizeCamera(gridInstance);
+
+	var assetCenterVector = {
+		x: cameraVector.x - asset.center.x,
+		y: cameraVector.y - asset.center.y,
+		z: cameraVector.z - asset.center.z
+	};
+
+	//Cos(theta) = dot product / product of magnitudes
+	
+	var relativeAngle = cosOfAngle(normalVectorOfCamera, assetCenterVector);
+
+	return relativeAngle > VIEW_ANGLE;
+}
+
+function cosOfAngle(v1, v2) {
+	return dotProduct(v1, v2) / (magnitude(v1) * magnitude(v2));
+}
+
+function normalizeCamera(gridInstance) {
+	return {
+		x: Math.cos(gridInstance.cameraTheta * Math.PI/180),
+		y: Math.sin(gridInstance.cameraTheta * Math.PI/180),
+		z: 0
+	};
+}
+
+//Applies to anything with x y z variables
+function dotProduct(v1, v2) {
+	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+function magnitude(v) {
+	return Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
+
+function getPositionRelativeToCamera(gridInstance, asset){
+	var relPos = {
+		x: gridInstance.cameraX - asset.center.x,
+		y: gridInstance.cameraY - asset.center.y,
+		z: gridInstance.cameraZ - asset.center.z,
+		theta: asset.theta - gridInstance.cameraTheta 
+	};
+	
+	var relativeCos = cosOfAngle(normalizeCamera(gridInstance), relPos);
+	var relativeSin = Math.sqrt(1 - relativeCos * relativeCos);
+	var relativeMagnitude = magnitude(relPos);
+	
+	var rotatedRelPos = {
+		x: relativeMagnitude * relativeSin,
+		y: relativeMagnitude * relativeCos,
+		z: relPos.z,
+		theta: relPos.theta
+	};
+
+	return rotatedRelPos;
+}
+
+
 
 //Z dimension ignored
 function drawPlane(gridInstance, planeDetails) {
@@ -45,8 +108,15 @@ function drawPlane(gridInstance, planeDetails) {
         face.setAttribute("style", cssText);
 	center.appendChild(face);
 	
-	center.style.transform = "rotateY(" + planeDetails.theta + "deg)  rotateX(" + planeDetails.phi + "deg) rotateZ("+planeDetails.phi + "deg) translateZ(" + planeDetails.center.y + "px) translateX(" + planeDetails.center.x + "px) translateY(" + planeDetails.center.y + "px)";
-        //Implement rotation by theta and phi
+
+	var relativePosition = getPositionRelativeToCamera(gridInstance, planeDetails);
+
+        center.style.transform = "rotateY(" + relativePosition.theta +"deg) " +
+                                "rotateX(" + planeDetails.phi + "deg) " +
+                                "rotateZ(" + planeDetails.phi + "deg) " +
+                                "translateZ(" + relativePosition.y + "px) " +
+                                "translateX(" + relativePosition.x + "px) " +
+                                "translateY(" + relativePosition.z + "px)";
 
         document.getElementById("cube").appendChild(center);
 }
@@ -106,9 +176,16 @@ function drawDiamond(gridInstance, diamondDetails){
 	center.appendChild(xzFace);
 	center.appendChild(yzFace);        
 
+	var relativePosition = getPositionRelativeToCamera(gridInstance, diamondDetails);
+	
+	center.style.transform = "rotateY(" + relativePosition.theta +"deg) " +
+				"rotateX(" + diamondDetails.phi + "deg) " +
+				"rotateZ(" + diamondDetails.phi + "deg) " +
+				"translateZ(" + relativePosition.y + "px) " +
+				"translateX(" + relativePosition.x + "px) " +
+				"translateY(" + relativePosition.z + "px)";
+			
 
-        center.style.transform = "rotateY(" + diamondDetails.theta + "deg)  rotateX(" + diamondDetails.phi + "deg) rotateZ("+diamondDetails.phi + "deg) translateZ(" + diamondDetails.center.y + "px) translateX(" + diamondDetails.center.x + "px) translateY(" + diamondDetails.center.y + "px)";
-        //Implement rotation by theta and phi
         
         document.getElementById("cube").appendChild(center);
 }
@@ -228,9 +305,15 @@ function drawBox(gridInstance, boxDetails){
 	center.appendChild(rightFace);
 	center.appendChild(backFace);
 	center.appendChild(bottomFace);
+	
+	var relativePosition = getPositionRelativeToCamera(gridInstance, boxDetails);
 
-	center.style.transform = "rotateY(" + boxDetails.theta + "deg)  rotateX(" + boxDetails.phi + "deg) rotateZ("+boxDetails.phi + "deg) translateZ(" + boxDetails.center.y + "px) translateX(" + boxDetails.center.x + "px) translateY(" + boxDetails.center.y + "px)";
-	//Implement rotation by theta and phi	
+        center.style.transform = "rotateY(" + relativePosition.theta +"deg) " +
+                                "rotateX(" + boxDetails.phi + "deg) " +
+                                "rotateZ(" + boxDetails.phi + "deg) " +
+                                "translateZ(" + relativePosition.y + "px) " +
+                                "translateX(" + relativePosition.x + "px) " +
+                                "translateY(" + relativePosition.z + "px)";
 
 	document.getElementById("cube").appendChild(center);
 
